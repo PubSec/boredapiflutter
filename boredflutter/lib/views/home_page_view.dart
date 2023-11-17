@@ -17,7 +17,11 @@ Map? dataResponse;
 String? apiResponse;
 Map? activityResponse;
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
+  bool state = false;
+  late final AnimationController _animationController;
+
   rive.Artboard? riveArtboard;
 
   @override
@@ -41,6 +45,20 @@ class _MyHomePageState extends State<MyHomePage> {
             .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     });
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+      lowerBound: 0.5,
+      upperBound: 0.6,
+    );
+    _animationController.repeat(
+        reverse: true, period: const Duration(seconds: 3));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _animationController.dispose();
   }
 
   // Future apiResponse() async {
@@ -94,15 +112,30 @@ class _MyHomePageState extends State<MyHomePage> {
                 const SizedBox(
                   height: 8.0,
                 ),
-                Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      Color(0xff1CDAC5),
-                      Color.fromARGB(255, 224, 224, 255),
-                    ]),
+                ScaleTransition(
+                  scale: _animationController,
+                  child: Container(
+                    transformAlignment: AlignmentDirectional.center,
+                    height: 80,
+                    width: 250,
+                    child: FloatingActionButton(
+                      tooltip: 'display random activity',
+                      backgroundColor: Colors.indigo[900],
+                      onPressed: () {
+                        activityApiResponse();
+                      },
+                      child: const Text(
+                        'Random Activity',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
                   ),
-                  padding: const EdgeInsets.all(20.0),
-                  margin: const EdgeInsets.only(top: 70),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(30.0),
                   alignment: Alignment.bottomCenter,
 
                   // child: dataResponse == null
@@ -113,11 +146,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       : Text(
                           '''
 Activity: ${activityResponse!['activity'].toString()}
-Type: ${activityResponse!['type'].toString()}  
+Type: ${activityResponse!['type'].toString()} 
+Participants: ${activityResponse!['participants'].toString()} 
                           ''',
                           softWrap: true,
-                          maxLines: 3,
+                          maxLines: 5,
                           textAlign: TextAlign.start,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                 ),
                 // Container(
@@ -143,27 +181,6 @@ Type: ${activityResponse!['type'].toString()}
                 // ),
               ],
             ),
-      floatingActionButton: Container(
-        margin: const EdgeInsets.only(
-          right: 115,
-          bottom: 230,
-        ),
-        width: 120,
-        child: FloatingActionButton(
-          tooltip: 'display random activity',
-          elevation: 5,
-          backgroundColor: Colors.indigo[900],
-          onPressed: () {
-            activityApiResponse();
-          },
-          child: const Text(
-            'Random Activity',
-            style: TextStyle(
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
