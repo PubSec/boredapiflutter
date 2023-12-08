@@ -1,3 +1,4 @@
+import 'package:boredflutter/utilites/material_state_method/background_color_method.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive/rive.dart' as rive;
@@ -11,10 +12,6 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-String? stringResponse;
-Map? mappedResponse;
-Map? dataResponse;
-String? apiResponse;
 Map? activityResponse;
 
 class _MyHomePageState extends State<MyHomePage>
@@ -27,7 +24,7 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void initState() {
     super.initState();
-    //apiResponse();
+
     rootBundle.load('assets/man.riv').then((data) async {
       try {
         final file = rive.RiveFile.import(data);
@@ -61,29 +58,18 @@ class _MyHomePageState extends State<MyHomePage>
     _animationController.dispose();
   }
 
-  // Future apiResponse() async {
-  //   http.Response response;
-  //   response = await http.get(Uri.parse("https://reqres.in/api/users/2"));
-  //   if (response.statusCode == 200) {
-  //     setState(() {
-  //       // stringResponse = response.body;
-  //       mappedResponse = json.decode(response.body);
-  //       dataResponse = mappedResponse!['data'];
-  //     });
-  //   }
-  // }
-
   Future activityApiResponse() async {
     http.Response response;
     response =
         await http.get(Uri.parse("http://www.boredapi.com/api/activity"));
     if (response.statusCode == 200) {
       setState(() {
-        // apiResponse = response.body;
         activityResponse = json.decode(response.body);
       });
     }
   }
+
+  final filledStar = const Icon(Icons.star);
 
   @override
   Widget build(BuildContext context) {
@@ -118,9 +104,12 @@ class _MyHomePageState extends State<MyHomePage>
                     transformAlignment: AlignmentDirectional.center,
                     height: 80,
                     width: 250,
-                    child: FloatingActionButton(
-                      tooltip: 'display random activity',
-                      backgroundColor: Colors.indigo[900],
+                    child: TextButton(
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.resolveWith<Color>(
+                                getBackgroundColor),
+                      ),
                       onPressed: () {
                         activityApiResponse();
                       },
@@ -137,50 +126,60 @@ class _MyHomePageState extends State<MyHomePage>
                 Container(
                   padding: const EdgeInsets.all(30.0),
                   alignment: Alignment.bottomCenter,
-
-                  // child: dataResponse == null
-                  //     ? const CircularProgressIndicator()
-                  //     : Text(dataResponse!['first_name'].toString()),
                   child: activityResponse == null
                       ? const Text('Activity will appear here')
-                      : Text(
-                          '''
-Activity: ${activityResponse!['activity'].toString()}
-Type: ${activityResponse!['type'].toString()} 
-Participants: ${activityResponse!['participants'].toString()} 
-                          ''',
-                          softWrap: true,
-                          maxLines: 5,
-                          textAlign: TextAlign.start,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                      : ListTile(
+                          visualDensity: VisualDensity.adaptivePlatformDensity,
+                          isThreeLine: true,
+                          leading: const Icon(
+                            Icons.local_activity_rounded,
+                            color: Colors.black,
+                          ),
+                          title: Text(
+                            'Activity: ${activityResponse!["activity"].toString()}',
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                          titleTextStyle: const TextStyle(
+                            fontSize: 17,
+                            color: Colors.black,
+                          ),
+                          subtitle: Text(
+                            'Type: ${activityResponse!["type"].toString()}',
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                          trailing: IconButton(
+                            color: Colors.black,
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  backgroundColor: Colors.green,
+                                  showCloseIcon: true,
+                                  closeIconColor: Colors.white,
+                                  content: Text('Added to Favorites'),
+                                ),
+                              );
+                            },
+                            icon: filledStar,
                           ),
                         ),
                 ),
-                // Container(
-                //   height: 50,
-                //   decoration: const BoxDecoration(
-                //     gradient: LinearGradient(colors: [
-                //       Color(0xff1CDAC5),
-                //       Color.fromARGB(255, 224, 224, 255),
-                //     ]),
-                //   ),
-                //   padding: const EdgeInsets.all(10.0),
-
-                //   alignment: Alignment.bottomCenter,
-
-                //   // child: dataResponse == null
-                //   //     ? const CircularProgressIndicator()
-                //   //     : Text(dataResponse!['first_name'].toString()),
-                //   child: activityResponse == null
-                //       ? const Text('Activity will appear here')
-                //       : Text(
-                //           '${activityResponse!['type'].toString()}',
-                //         ),
-                // ),
               ],
             ),
+      floatingActionButton: SizedBox(
+        width: 100,
+        child: FloatingActionButton(
+          backgroundColor: Colors.blue.shade400,
+          elevation: 100,
+          tooltip: 'go to favorites',
+          onPressed: () {
+            Navigator.of(context).pushNamed('favorite');
+          },
+          child: const Text(
+            'Favorites',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ),
     );
   }
 }

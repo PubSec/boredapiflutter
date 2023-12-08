@@ -1,3 +1,4 @@
+import 'package:boredflutter/views/favorite_list.dart';
 import 'package:boredflutter/views/home_page_view.dart';
 import 'package:flutter/material.dart';
 
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
       ),
       routes: {
         "/": (context) => const MyHomePage(),
+        "favorite": (context) => const MyFavoriteListView(),
       },
     );
   }
